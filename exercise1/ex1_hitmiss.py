@@ -13,15 +13,14 @@ for rep in range(n_repetitions):
         number = batch_size[i]
         minF = 0.
         maxF = 1.
-        #print("Estimating for N = ", number, " samples")
-
+        
+        # random numbers [0,1)
         x = np.random.rand(number)
         y = np.random.rand(number)
     
-
-
         ##method 2: hit or miss
-        f_value = np.cos(1/rnumber)**2
+        f_x = np.cos(1/x)**2
+
         integral = np.mean(f_value)/(maxF-minF)
         # Salva il valore dell'integrale
         integral_values[rep, i] = integral
