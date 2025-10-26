@@ -21,11 +21,18 @@ for rep in range(n_repetitions):
         ##method 2: hit or miss
         f_x = np.cos(1/x)**2
 
-        integral = np.mean(f_value)/(maxF-minF)
-        # Salva il valore dell'integrale
+        #hits count
+        hits = np.sum(y<=f_x)
+
+        #bounding box area
+        maxf_x = 1
+        area = (maxF-minF)*maxf_x
+
+        #calculate the integral
+        integral = (hits/number)*area
+        # Save the result
         integral_values[rep, i] = integral
-        #print("\nIntegral of the function cos(1/x)^2:", integral)
-        #print("\n")
+
     
 ##mean value for each batch size
 #axis 0 indicates mean and variance along the rows
@@ -37,7 +44,7 @@ std_err_mean = np.sqrt(variance/n_repetitions)
 
 ##plot Std error of the mean 
 plt.figure(figsize=(10, 6))
-plt.suptitle("Standard Error of the Mean (Sampling Mean Method)", fontsize=16)
+plt.suptitle("Standard Error of the Mean (Hit or Miss Method)", fontsize=16)
 plt.semilogx(batch_size, abs(std_err_mean), 'o', markersize=8, label='Data')
 N_theory = np.logspace(1, 7, 100)  # Da 10 a 10^7
 # Normalization
@@ -48,12 +55,12 @@ plt.xlabel('Batch size (N)', fontsize=12)
 plt.ylabel('Standard Error of the Mean', fontsize=12)
 plt.grid(True, alpha=0.3, which='both')
 plt.legend()
-plt.savefig("std_error_sampling.png", dpi=300, bbox_inches='tight')
+plt.savefig("std_error_hitmiss.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 ##plot Std error of the mean (log-log)
 plt.figure(figsize=(10, 6))
-plt.suptitle("Linear Fit Standard Error of the Mean (Sampling Mean Method)", fontsize=16)
+plt.suptitle("Linear Fit Standard Error of the Mean (Hit or Miss Method)", fontsize=16)
 plt.loglog(batch_size, abs(std_err_mean), 'o', markersize=8, label='Data')
 
 ## Linear Fit log-log
@@ -73,18 +80,18 @@ plt.xlabel('Batch size (N)', fontsize=12)
 plt.ylabel('Standard Error of the Mean', fontsize=12)
 plt.grid(True, alpha=0.3, which='both')
 plt.legend()
-plt.savefig("std_error_sampling_loglog_fit.png", dpi=300, bbox_inches='tight')
+plt.savefig("std_error_hitmiss_loglog_fit.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 print(f"Fit Slope: {slope:.6f}")
 
 ## Convergence (plot the convergence for he first repetition)
 plt.figure(figsize=(10, 6))
-plt.suptitle("Convergence to the Correct Answer (Sampling Mean Method)", fontsize=16)
+plt.suptitle("Convergence to the Correct Answer (Hit or Miss Method)", fontsize=16)
 # Plot con scala logaritmica sull'asse x
 plt.semilogx(batch_size, abs(integral_values[0, :]-true_value), 'o-', markersize=8, linewidth=2)
 plt.xlabel('Batch size (N)', fontsize=12)
 plt.ylabel('Result - True value', fontsize=12)
 plt.grid(True, alpha=0.3)
-plt.savefig("convergence_sampling.png", dpi=300, bbox_inches='tight')
+plt.savefig("convergence_hitmiss.png", dpi=300, bbox_inches='tight')
 plt.close()
