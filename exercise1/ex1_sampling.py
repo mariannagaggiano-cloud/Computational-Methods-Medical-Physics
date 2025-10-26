@@ -28,7 +28,7 @@ for rep in range(n_repetitions):
         ##method 1: sampling
         f_value = np.cos(1/rnumber)**2
         integral = np.mean(f_value)/(maxF-minF)
-        # Salva il valore dell'integrale
+        # Save the result
         integral_values[rep, i] = integral
         #print("\nIntegral of the function cos(1/x)^2:", integral)
         #print("\n")
