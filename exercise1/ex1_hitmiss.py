@@ -101,3 +101,4 @@ plt.close()
 
 print(means[7])
 print(std_err_mean[7])
+print(integral_values[0,7]-true_value[0,0])

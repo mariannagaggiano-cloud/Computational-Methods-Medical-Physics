@@ -45,7 +45,7 @@ std_err_mean = np.sqrt(variance/n_repetitions)
 plt.figure(figsize=(10, 6))
 plt.suptitle("Standard Error of the Mean (Sampling Mean Method)", fontsize=18)
 plt.semilogx(batch_size, abs(std_err_mean), 'o', markersize=8, label='Data')
-N_theory = np.logspace(1, 8, 100)  # Da 10 a 10^7
+N_theory = np.logspace(1, 8, 100)  # Da 10 a 10^8
 # Normalization
 C = std_err_mean[0] * np.sqrt(batch_size[0]) 
 theory_curve = C / np.sqrt(N_theory)
@@ -100,3 +100,4 @@ plt.close()
 
 print(means[7])
 print(std_err_mean[7])
+print(integral_values[0,7]-true_value[0,0])
