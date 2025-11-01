@@ -97,3 +97,6 @@ plt.tick_params(axis='both', which='major', labelsize=14)
 plt.grid(True, alpha=0.3)
 plt.savefig("convergence_sampling.png", dpi=300, bbox_inches='tight')
 plt.close()
+
+print(means[7])
+print(std_err_mean[7])
