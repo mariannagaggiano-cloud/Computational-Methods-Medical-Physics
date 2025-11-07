@@ -132,4 +132,19 @@ plt.legend(fontsize=16)
 plt.savefig("sem.png", dpi=300, bbox_inches='tight')
 plt.close()
 
+x_plot = np.arange(0, 1, 0.01)
+f_plot = np.exp(-x_plot**2)
+g_plot = np.exp(-x_plot)
+f_minus_g_plot = f_plot - g_plot
+
+plt.figure(0)
+plt.plot(x_plot, f_plot, 'b')
+plt.plot(x_plot, g_plot, 'g')
+plt.plot(x_plot, f_minus_g_plot, 'r')
+plt.xlabel("y")
+plt.ylabel("x")
+plt.grid(True)
+plt.gca().legend(('f(x)=$e^{-x^2}$', 'g(x)=$e^{-x}$', 'f(x) - g(x)'))
+plt.show(block=True)
+plt.savefig("functions.png", dpi=300, bbox_inches='tight')
 
