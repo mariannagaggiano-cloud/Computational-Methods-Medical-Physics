@@ -140,8 +140,8 @@ f_minus_g_plot = f_plot - g_plot
 ratio_f_g = f_plot/g_plot
 
 plt.figure(figsize=(10, 6))
-plt.plot(x_plot, f_plot, 'b', linewidth=2, label=rf'$f(x)=e^{'-x^2'}$' )
-plt.plot(x_plot, g_plot, 'g', linewidth=2, label=rf'$f(x)=e^{'-x'}$')
+plt.plot(x_plot, f_plot, 'b', linewidth=2, label=r'$f(x)=e^{-x^2}$' )
+plt.plot(x_plot, g_plot, 'g', linewidth=2, label=r'$f(x)=e^{-x}$')
 plt.plot(x_plot, f_minus_g_plot, 'r', linewidth=2, label=rf'$f(x)-g(x)$')
 plt.plot(x_plot, ratio_f_g, 'm', linewidth=2, label=rf'$f(x)/g(x)$')
 plt.xlabel("x", fontsize=16)
