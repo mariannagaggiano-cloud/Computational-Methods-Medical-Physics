@@ -132,19 +132,23 @@ plt.legend(fontsize=16)
 plt.savefig("sem.png", dpi=300, bbox_inches='tight')
 plt.close()
 
+
 x_plot = np.arange(0, 1, 0.01)
 f_plot = np.exp(-x_plot**2)
 g_plot = np.exp(-x_plot)
 f_minus_g_plot = f_plot - g_plot
+ratio_f_g = f_plot/g_plot
 
-plt.figure(0)
-plt.plot(x_plot, f_plot, 'b')
-plt.plot(x_plot, g_plot, 'g')
-plt.plot(x_plot, f_minus_g_plot, 'r')
-plt.xlabel("x")
-plt.ylabel("y")
+plt.figure(figsize=(10, 6))
+plt.plot(x_plot, f_plot, 'b', linewidth=2, label=rf'$f(x)=e^{'-x^2'}$' )
+plt.plot(x_plot, g_plot, 'g', linewidth=2, label=rf'$f(x)=e^{'-x'}$')
+plt.plot(x_plot, f_minus_g_plot, 'r', linewidth=2, label=rf'$f(x)-g(x)$')
+plt.plot(x_plot, ratio_f_g, 'm', linewidth=2, label=rf'$f(x)/g(x)$')
+plt.xlabel("x", fontsize=16)
+plt.ylabel("y", fontsize=16)
 plt.grid(True)
-plt.gca().legend(('f(x)=$e^{-x^2}$', 'g(x)=$e^{-x}$', 'f(x) - g(x)'))
+plt.legend(fontsize=16)
+plt.tick_params(axis='both', which='major', labelsize=14)
 plt.show(block=True)
 plt.savefig("functions.png", dpi=300, bbox_inches='tight')
 
