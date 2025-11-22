@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 X=np.arange(-5,100,1)
 Y=np.arange(-50,50,1)
 
-N=500
+N=50
 
 
 all_x_paths = []
@@ -135,7 +135,7 @@ plt.figure(figsize=(10, 6))
 plt.hist(distances_tot, bins=20, edgecolor='black', alpha=0.7, color='skyblue', density=True, label='simulated data')
 plt.axvline(np.mean(distances_tot), color='r', linestyle='--', linewidth=2, 
             label=f'Mean: {np.mean(distances_tot):.2f}')
-plt.xlabel('Path lenght', fontsize=16)
+plt.xlabel('Path lenght [mm]', fontsize=16)
 plt.ylabel('Frequency', fontsize=16)
 plt.title(f'Total Path Lenght Distribution ({N} particles)', fontsize=18, fontweight='bold')
 plt.legend(fontsize=16)
@@ -161,7 +161,7 @@ plt.plot(x_theory, np.exp(-x_theory), 'r-', linewidth=2, label='$f(x)=e^{-x}$')
 
 plt.axvline(np.mean(all_distances_flat), color='g', linestyle='--', linewidth=2, 
             label=f'Mean: {np.mean(all_distances_flat):.2f}')
-plt.xlabel('Path length', fontsize=16)
+plt.xlabel('Path length [mm]', fontsize=16)
 plt.ylabel('Frequency', fontsize=16)
 plt.title(f'Single-Step Path Length Distribution ({N} particles)', 
           fontsize=18, fontweight='bold')
@@ -242,8 +242,8 @@ ax1.axhline(Y.max(), color='r', linestyle='--', alpha=0.5, linewidth=2)
 ax1.axvline(X.min(), color='r', linestyle='--', alpha=0.5, linewidth=2)
 ax1.axvline(X.max(), color='r', linestyle='--', alpha=0.5, linewidth=2)
 
-ax1.set_xlabel('x', fontsize=16)
-ax1.set_ylabel('y', fontsize=16)
+ax1.set_xlabel('x [mm]', fontsize=16)
+ax1.set_ylabel('y [mm]', fontsize=16)
 ax1.set_title(f'Full View: {N} particle trajectories', fontsize=18, fontweight='bold')
 ax1.grid(True, alpha=0.3)
 ax1.legend(fontsize=16, loc='best')
@@ -260,8 +260,8 @@ for i in range(N):
 
 ax2.set_xlim(x_zoom_min, x_zoom_max)
 ax2.set_ylim(y_zoom_min, y_zoom_max)
-ax2.set_xlabel('x', fontsize=16)
-ax2.set_ylabel('y', fontsize=16)
+ax2.set_xlabel('x [mm]', fontsize=16)
+ax2.set_ylabel('y [mm]', fontsize=16)
 ax2.set_title(f'Zoomed View: {N} particle trajectories', fontsize=18, fontweight='bold')
 ax2.grid(True, alpha=0.3)
 ax2.tick_params(axis='both', which='major', labelsize=14)
@@ -286,7 +286,7 @@ if count5>0:
     plt.hist(y5, bins=20, edgecolor='black', alpha=0.7, color='skyblue', density=True, label='simulated data')
     plt.axvline(np.mean(y5), color='r', linestyle='--', linewidth=2, 
                 label=f'Mean: {np.mean(y5):.2f}')
-    plt.xlabel('Position along y-axis', fontsize=16)
+    plt.xlabel('Position along y-axis [mm]', fontsize=16)
     plt.ylabel('Frequency', fontsize=16)
     plt.title(f'Position Distribution at 5mm ({N} particles)', fontsize=18, fontweight='bold')
     plt.suptitle(f'{count5} particles reached the detector', fontsize=16)
@@ -303,7 +303,7 @@ if count20>0:
     plt.hist(y20, bins=20, edgecolor='black', alpha=0.7, color='skyblue', density=True, label='simulated data')
     plt.axvline(np.mean(y20), color='r', linestyle='--', linewidth=2, 
             label=f'Mean: {np.mean(y20):.2f}')
-    plt.xlabel('Position along y-axis', fontsize=16)
+    plt.xlabel('Position along y-axis [mm]', fontsize=16)
     plt.ylabel('Frequency', fontsize=16)
     plt.title(f'Position Distribution at 20mm ({N} particles)', fontsize=18, fontweight='bold')
     plt.suptitle(f'{count20} particles reached the detector', fontsize=16)
