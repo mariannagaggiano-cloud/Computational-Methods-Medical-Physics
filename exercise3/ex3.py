@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 X=np.arange(-5,100,1)
 Y=np.arange(-50,50,1)
 
-N=50
-
+N=1000000
 
 all_x_paths = []
 all_y_paths = []
 all_angles_paths = []
+angles_tot = []
 all_distance_paths = []
 distances_tot = []
 
@@ -27,6 +27,7 @@ for n in range(N):
     x=0
     y=0
     angle=0
+    angle_tot=0
     distance=0
     distance_tot=0
 
@@ -49,22 +50,22 @@ for n in range(N):
         distance=-np.log(1-rn1)
         distance_tot=distance_tot+distance
 
-        if x<5 and x+distance*np.cos(np.radians(angle))>=5:
+        if x<5<=x+distance*np.cos(np.radians(angle_tot))>=5:
             count5=count5+1
-            y5_val=y+(5-x)*np.tan(np.radians(angle))
+            y5_val=y+(5-x)*np.tan(np.radians(angle_tot))
             y5.append(y5_val)
 
-        if x<20 and x+distance*np.cos(np.radians(angle))>=20:
+        if x<20<=x+distance*np.cos(np.radians(angle_tot)):
             count20=count20+1
-            y20_val=y+(20-x)*np.tan(np.radians(angle))
+            y20_val=y+(20-x)*np.tan(np.radians(angle_tot))
             y20.append(y20_val)
 
 
         angles_path.append(angle)
         distance_path.append(distance)
 
-        x=x+distance*np.cos(np.radians(angle))
-        y=y+distance*np.sin(np.radians(angle))
+        x=x+distance*np.cos(np.radians(angle_tot))
+        y=y+distance*np.sin(np.radians(angle_tot))
 
         x_path.append(x)
         y_path.append(y)
@@ -96,6 +97,8 @@ for n in range(N):
         if np.random.rand()<0.5:
             angle=-angle
 
+        angle_tot=angle_tot+angle
+
         
 
     all_x_paths.append(x_path)
@@ -103,13 +106,19 @@ for n in range(N):
     all_angles_paths.append(angles_path)
     all_distance_paths.append(distance_path)
     distances_tot.append(distance_tot)
+    angles_tot.append(angle_tot)
 
 
 # results
-ratio=abs_interactions/scat_interactions
-print(f"ratio of absorption-scattering interactions: r={ratio}")
+if scat_interactions > 0:
+    ratio = abs_interactions/scat_interactions
+    print(f"ratio of absorption-scattering interactions: r={ratio}")
+else:
+    print("No scattering interactions occurred")
+
 print(f"number of particle reachin the detector at x=5mm: count(5)={count5}")
 print(f"number of particle reachin the detector at x=20mm: count(20)={count20}")
+
 """
 print("total path for each particle")
 print(distances_tot)
@@ -145,6 +154,20 @@ plt.tight_layout()
 plt.savefig("dist_total.png", dpi=300, bbox_inches='tight')
 plt.show()
 
+#plot distribution total angle
+plt.figure(figsize=(10, 6))
+plt.hist(angles_tot, bins=20, edgecolor='black', alpha=0.7, color='skyblue', density=True, label='simulated data')
+plt.axvline(np.mean(angles_tot), color='r', linestyle='--', linewidth=2, 
+            label=f'Mean: {np.mean(angles_tot):.2f}')
+plt.xlabel('Scattering Angle [degrees]', fontsize=16)
+plt.ylabel('Frequency', fontsize=16)
+plt.title(f'Total Scattering Angle Distribution ({N} particles)', fontsize=18, fontweight='bold')
+plt.legend(fontsize=16)
+plt.grid(True, alpha=0.3)
+plt.tick_params(axis='both', which='major', labelsize=14)
+plt.tight_layout()
+plt.savefig("ang_total.png", dpi=300, bbox_inches='tight')
+plt.show()
 
 #plot single step distance
 all_distances_flat = []
@@ -190,7 +213,7 @@ x_theory_pos = np.linspace(0, 180, 1000)
 f_theory_pos = x_theory_pos * np.exp(-x_theory_pos**2 / 625)/625
 
 plt.plot(x_theory_pos, f_theory_pos, 'r-', linewidth=2, 
-         label=r'$f(\theta) = \frac{C}{2} \cdot \theta \cdot e^{-\theta^2/a^2}$')
+         label=r'$f(\theta) = \frac{C}{2} \cdot |\theta| \cdot e^{-\theta^2/a^2}$')
 
 # theory curve for negative angles
 x_theory_neg = np.linspace(-180, 0, 1000)
@@ -204,7 +227,7 @@ plt.axvline(np.mean(all_angles_flat), color='g', linestyle='--', linewidth=2,
             label=f'Mean: {np.mean(all_angles_flat):.2f}°')
 
 
-plt.xlabel('Scattering Angle (degrees)', fontsize=16)
+plt.xlabel('Scattering Angle [degrees]', fontsize=16)
 plt.ylabel('Frequency', fontsize=16)
 plt.title(f'Scattering Angle Distribution ({N} particles)', 
           fontsize=18, fontweight='bold')
@@ -222,7 +245,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 
 # 2D tracking
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12))
-
+'''
 #principal plot
 for i in range(N):
     if i == 0:
@@ -279,7 +302,7 @@ ax1.legend(fontsize=16, loc='best')
 plt.tight_layout() 
 plt.savefig("path.png", dpi=300, bbox_inches='tight')
 plt.show()
-
+'''
 #plot distribution detector 5
 if count5>0:
     plt.figure(figsize=(10, 6))
@@ -288,7 +311,7 @@ if count5>0:
                 label=f'Mean: {np.mean(y5):.2f}')
     plt.xlabel('Position along y-axis [mm]', fontsize=16)
     plt.ylabel('Frequency', fontsize=16)
-    plt.title(f'Position Distribution at 5mm ({N} particles)', fontsize=18, fontweight='bold')
+    plt.title(f'Position Distribution at x=5mm ({N} particles)', fontsize=18, fontweight='bold')
     plt.suptitle(f'{count5} particles reached the detector', fontsize=16)
     plt.legend(fontsize=16)
     plt.grid(True, alpha=0.3)
@@ -305,7 +328,7 @@ if count20>0:
             label=f'Mean: {np.mean(y20):.2f}')
     plt.xlabel('Position along y-axis [mm]', fontsize=16)
     plt.ylabel('Frequency', fontsize=16)
-    plt.title(f'Position Distribution at 20mm ({N} particles)', fontsize=18, fontweight='bold')
+    plt.title(f'Position Distribution at x=20mm ({N} particles)', fontsize=18, fontweight='bold')
     plt.suptitle(f'{count20} particles reached the detector', fontsize=16)
     plt.legend(fontsize=16)
     plt.grid(True, alpha=0.3)
