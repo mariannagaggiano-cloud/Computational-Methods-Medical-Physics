@@ -1,294 +1,189 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
 
-class KMeans:
-    def __init__(self, k, max_iter=100, threshold=0.01):
-        """
-        Inizializza l'algoritmo k-means
-        k: numero di cluster
-        max_iter: numero massimo di iterazioni
-        threshold: soglia per la convergenza (variazione TV in %)
-        """
-        self.k = k
-        self.max_iter = max_iter
-        self.threshold = threshold
-        self.means = None
-        self.clusters = None
-        self.tv_history = []
-        
-    def euclidean_distance(self, x, m):
-        """Calcola la distanza euclidea tra punto x e media m"""
-        return np.sqrt(np.sum((x - m) ** 2))
-    
-    def initialize_means(self, data):
-        """Inizializza k medie random nello spazio dei dati"""
-        n_features = data.shape[1]
-        # Sample random punti nell'intervallo dei dati
-        min_vals = np.min(data, axis=0)
-        max_vals = np.max(data, axis=0)
-        self.means = np.random.uniform(min_vals, max_vals, (self.k, n_features))
-    
-    def assign_clusters(self, data):
-        """Assegna ogni punto al cluster con la media più vicina"""
-        n_samples = data.shape[0]
-        clusters = np.zeros(n_samples, dtype=int)
-        
-        for i in range(n_samples):
-            distances = [self.euclidean_distance(data[i], mean) for mean in self.means]
-            clusters[i] = np.argmin(distances)
-        
-        return clusters
-    
-    def calculate_total_variation(self, data, clusters):
-        """Calcola la variazione totale (TV)"""
-        tv = 0
-        for cluster_idx in range(self.k):
-            cluster_points = data[clusters == cluster_idx]
-            if len(cluster_points) > 0:
-                for point in cluster_points:
-                    tv += self.euclidean_distance(point, self.means[cluster_idx]) ** 2
-        return tv
-    
-    def update_means(self, data, clusters):
-        """Aggiorna le medie basandosi sui punti di ogni cluster"""
-        new_means = np.zeros((self.k, data.shape[1]))
-        for cluster_idx in range(self.k):
-            cluster_points = data[clusters == cluster_idx]
-            if len(cluster_points) > 0:
-                new_means[cluster_idx] = np.mean(cluster_points, axis=0)
-            else:
-                # Se un cluster è vuoto, reinizializza random
-                new_means[cluster_idx] = self.means[cluster_idx]
-        return new_means
-    
-    def fit(self, data):
-        """Esegue l'algoritmo k-means"""
-        # Step 2: Inizializza medie random
-        self.initialize_means(data)
-        
-        initial_tv = None
-        
-        for iteration in range(self.max_iter):
-            # Step 3-4: Assegna punti ai cluster
-            self.clusters = self.assign_clusters(data)
-            
-            # Step 5: Calcola TV
-            tv = self.calculate_total_variation(data, self.clusters)
-            self.tv_history.append(tv)
-            
-            if initial_tv is None:
-                initial_tv = tv
-            
-            # Check convergenza
-            if iteration > 0:
-                tv_change = abs(self.tv_history[-1] - self.tv_history[-2])
-                tv_change_percent = (tv_change / self.tv_history[-2]) * 100
-                if tv_change_percent < self.threshold:
-                    print(f"Convergenza raggiunta all'iterazione {iteration}")
-                    break
-            
-            # Step 6: Aggiorna medie
-            self.means = self.update_means(data, self.clusters)
-        
-        return initial_tv, self.tv_history[-1]
+# ===================== FUNZIONI PRINCIPALI =====================
 
+def euclidean_distance(x, m):
+    """Distanza euclidea tra punto x e media m"""
+    return np.sqrt(np.sum((x - m) ** 2))
 
-def elbow_method(data, k_range, n_runs=5):
-    """Metodo elbow per determinare il numero ottimale di cluster"""
-    tv_values = []
+def initialize_means(data, k):
+    """Inizializza k medie random"""
+    min_vals = np.min(data, axis=0)
+    max_vals = np.max(data, axis=0)
+    return np.random.uniform(min_vals, max_vals, (k, data.shape[1]))
+
+def assign_clusters(data, means):
+    """Assegna ogni punto al cluster più vicino"""
+    clusters = np.zeros(len(data), dtype=int)
+    for i, point in enumerate(data):
+        distances = [euclidean_distance(point, mean) for mean in means]
+        clusters[i] = np.argmin(distances)
+    return clusters
+
+def calculate_tv(data, means, clusters, k):
+    """Calcola Total Variation"""
+    tv = 0
+    for c in range(k):
+        cluster_points = data[clusters == c]
+        for point in cluster_points:
+            tv += euclidean_distance(point, means[c]) ** 2
+    return tv
+
+def update_means(data, clusters, k):
+    """Aggiorna le medie"""
+    means = np.zeros((k, data.shape[1]))
+    for c in range(k):
+        cluster_points = data[clusters == c]
+        if len(cluster_points) > 0:
+            means[c] = np.mean(cluster_points, axis=0)
+    return means
+
+def kmeans(data, k, max_iter=100):
+    """Algoritmo k-means completo"""
+    means = initialize_means(data, k)
+    tv_history = []
     
-    for k in k_range:
-        print(f"Testing k={k}...")
-        best_tv = float('inf')
+    for iteration in range(max_iter):
+        clusters = assign_clusters(data, means)
+        tv = calculate_tv(data, means, clusters, k)
+        tv_history.append(tv)
         
-        # Esegui più volte per ogni k e prendi il miglior risultato
-        for run in range(n_runs):
-            kmeans = KMeans(k=k, max_iter=100, threshold=0.01)
-            _, final_tv = kmeans.fit(data)
-            if final_tv < best_tv:
-                best_tv = final_tv
+        # Convergenza: TV cambia < 1%
+        if iteration > 0:
+            change = abs(tv_history[-1] - tv_history[-2]) / tv_history[-2] * 100
+            if change < 1.0:
+                break
         
-        tv_values.append(best_tv)
+        means = update_means(data, clusters, k)
     
-    return tv_values
+    return means, clusters, tv_history[0], tv_history[-1]
 
-
-def silhouette_method(data, k_range, n_runs=5):
-    """Metodo silhouette per determinare il numero ottimale di cluster"""
-    silhouette_scores = []
+def silhouette_score(data, clusters, k):
+    """Calcola silhouette score medio"""
+    if k == 1:
+        return 0
     
-    for k in k_range:
-        if k == 1:
-            silhouette_scores.append(0)
-            continue
-            
-        print(f"Testing k={k} (Silhouette)...")
-        best_score = -1
-        best_kmeans = None
-        
-        # Esegui più volte per ogni k
-        for run in range(n_runs):
-            kmeans = KMeans(k=k, max_iter=100, threshold=0.01)
-            kmeans.fit(data)
-            score = calculate_silhouette_score(data, kmeans.clusters, k)
-            if score > best_score:
-                best_score = score
-                best_kmeans = kmeans
-        
-        silhouette_scores.append(best_score)
-    
-    return silhouette_scores
-
-
-def calculate_silhouette_score(data, clusters, k):
-    """Calcola lo score silhouette medio"""
-    n_samples = data.shape[0]
-    silhouette_values = []
-    
-    for i in range(n_samples):
+    scores = []
+    for i in range(len(data)):
         cluster_i = clusters[i]
+        same_cluster = data[clusters == cluster_i]
         
-        # Calcola a_i (similarità intra-cluster)
-        same_cluster_points = data[clusters == cluster_i]
-        if len(same_cluster_points) <= 1:
-            silhouette_values.append(0)
+        if len(same_cluster) <= 1:
             continue
         
-        a_i = np.mean([np.linalg.norm(data[i] - point) 
-                       for point in same_cluster_points if not np.array_equal(point, data[i])])
+        # a_i: distanza media intra-cluster
+        a_i = np.mean([np.linalg.norm(data[i] - p) for p in same_cluster 
+                       if not np.array_equal(p, data[i])])
         
-        # Calcola b_i (dissimilarità inter-cluster)
+        # b_i: distanza minima inter-cluster
         b_i = float('inf')
-        for cluster_j in range(k):
-            if cluster_j != cluster_i:
-                other_cluster_points = data[clusters == cluster_j]
-                if len(other_cluster_points) > 0:
-                    mean_dist = np.mean([np.linalg.norm(data[i] - point) 
-                                        for point in other_cluster_points])
-                    b_i = min(b_i, mean_dist)
+        for c in range(k):
+            if c != cluster_i:
+                other_cluster = data[clusters == c]
+                if len(other_cluster) > 0:
+                    dist = np.mean([np.linalg.norm(data[i] - p) for p in other_cluster])
+                    b_i = min(b_i, dist)
         
-        # Calcola s_i
-        s_i = (b_i - a_i) / max(a_i, b_i)
-        silhouette_values.append(s_i)
+        # s_i
+        s_i = (b_i - a_i) / max(a_i, b_i) if b_i != float('inf') else 0
+        scores.append(s_i)
     
-    return np.mean(silhouette_values)
-
-
-def plot_results(data, kmeans, initial_tv, final_tv):
-    """Visualizza i risultati finali del clustering"""
-    fig, ax = plt.subplots(figsize=(12, 10))
-    
-    # Crea colormap
-    colors = plt.cm.rainbow(np.linspace(0, 1, kmeans.k))
-    
-    # Plotta ogni cluster
-    for cluster_idx in range(kmeans.k):
-        cluster_points = data[kmeans.clusters == cluster_idx]
-        ax.scatter(cluster_points[:, 0], cluster_points[:, 1], 
-                  c=[colors[cluster_idx]], label=f'Cluster {cluster_idx+1}',
-                  alpha=0.6, s=20)
-    
-    # Plotta le medie
-    ax.scatter(kmeans.means[:, 0], kmeans.means[:, 1], 
-              c='black', marker='X', s=200, edgecolors='white', linewidths=2,
-              label='Centroids', zorder=5)
-    
-    ax.set_xlabel('X coordinate', fontsize=12)
-    ax.set_ylabel('Y coordinate', fontsize=12)
-    ax.set_title(f'K-means Clustering Results (k={kmeans.k})\n'
-                f'Initial TV: {initial_tv:.2f}, Final TV: {final_tv:.2f}', 
-                fontsize=14)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', ncol=2)
-    ax.grid(True, alpha=0.3)
-    plt.tight_layout()
-    return fig
-
+    return np.mean(scores) if scores else 0
 
 # ===================== MAIN =====================
 
-# Carica i dati
-print("Caricamento dati s2.txt...")
+print("📂 Caricamento dati...")
 data = np.loadtxt('s2.txt')
-print(f"Dati caricati: {data.shape[0]} punti con {data.shape[1]} features")
+print(f"✓ Caricati {len(data)} punti\n")
 
-# 1. METODO ELBOW
-print("\n=== METODO ELBOW ===")
+# 1. ELBOW METHOD
+print("📊 Metodo Elbow...")
 k_range = range(2, 21)
-tv_values = elbow_method(data, k_range, n_runs=5)
+tv_values = []
 
-# Plot elbow
-plt.figure(figsize=(10, 6))
-plt.plot(k_range, tv_values, 'bo-', linewidth=2, markersize=8)
-plt.xlabel('Numero di cluster (k)', fontsize=12)
-plt.ylabel('Total Variation', fontsize=12)
-plt.title('Elbow Method', fontsize=14)
+for k in k_range:
+    _, _, _, final_tv = kmeans(data, k)
+    tv_values.append(final_tv)
+    print(f"  k={k}: TV={final_tv:.0f}")
+
+plt.figure(figsize=(10, 5))
+plt.plot(k_range, tv_values, 'bo-', linewidth=2)
+plt.xlabel('Numero di cluster (k)')
+plt.ylabel('Total Variation')
+plt.title('Elbow Method')
 plt.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig('elbow_method.png', dpi=300, bbox_inches='tight')
-print("Grafico elbow salvato come 'elbow_method.png'")
+plt.savefig('elbow_method.png', dpi=200)
+print("✓ Salvato: elbow_method.png\n")
 
-# 2. METODO SILHOUETTE
-print("\n=== METODO SILHOUETTE ===")
-silhouette_scores = silhouette_method(data, k_range, n_runs=5)
+# 2. SILHOUETTE METHOD
+print("📊 Metodo Silhouette...")
+silhouette_scores = []
 
-# Plot silhouette
-plt.figure(figsize=(10, 6))
-plt.plot(k_range, silhouette_scores, 'ro-', linewidth=2, markersize=8)
-plt.xlabel('Numero di cluster (k)', fontsize=12)
-plt.ylabel('Silhouette Score medio', fontsize=12)
-plt.title('Silhouette Method', fontsize=14)
+for k in k_range:
+    means, clusters, _, _ = kmeans(data, k)
+    score = silhouette_score(data, clusters, k)
+    silhouette_scores.append(score)
+    print(f"  k={k}: Score={score:.3f}")
+
+plt.figure(figsize=(10, 5))
+plt.plot(k_range, silhouette_scores, 'ro-', linewidth=2)
+plt.xlabel('Numero di cluster (k)')
+plt.ylabel('Silhouette Score')
+plt.title('Silhouette Method')
 plt.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig('silhouette_method.png', dpi=300, bbox_inches='tight')
-print("Grafico silhouette salvato come 'silhouette_method.png'")
+plt.savefig('silhouette_method.png', dpi=200)
+print("✓ Salvato: silhouette_method.png\n")
 
 optimal_k = k_range[np.argmax(silhouette_scores)]
-print(f"\nNumero ottimale di cluster (Silhouette): k={optimal_k}")
+print(f"🎯 K ottimale (Silhouette): {optimal_k}\n")
 
-# 3. CLUSTERING FINALE CON K OTTIMALE (o k=15 come nel documento)
-print(f"\n=== CLUSTERING FINALE CON k=15 ===")
-best_kmeans = None
-best_final_tv = float('inf')
-best_initial_tv = None
+# 3. CLUSTERING FINALE con k=15
+print("🔧 Clustering finale con k=15...")
+means, clusters, init_tv, final_tv = kmeans(data, 15)
+print(f"  TV iniziale: {init_tv:.0f}")
+print(f"  TV finale: {final_tv:.0f}")
 
-# Esegui 10 volte e prendi il miglior risultato
-for run in range(10):
-    print(f"Run {run+1}/10...")
-    kmeans = KMeans(k=15, max_iter=100, threshold=0.01)
-    initial_tv, final_tv = kmeans.fit(data)
-    
-    if final_tv < best_final_tv:
-        best_final_tv = final_tv
-        best_initial_tv = initial_tv
-        best_kmeans = kmeans
+# 4. REPORT
+print("\n" + "="*50)
+print("📋 REPORT FINALE")
+print("="*50)
+print(f"Numero cluster: k=15")
+print(f"TV iniziale: {init_tv:.2f}")
+print(f"TV finale: {final_tv:.2f}")
+print(f"Riduzione: {(init_tv-final_tv)/init_tv*100:.1f}%")
 
-# 4. REPORT DEI RISULTATI
-print("\n" + "="*60)
-print("REPORT FINALE")
-print("="*60)
-print(f"Numero di cluster: k={best_kmeans.k}")
-print(f"Total Variation iniziale: {best_initial_tv:.2f}")
-print(f"Total Variation finale: {best_final_tv:.2f}")
-print(f"Riduzione TV: {((best_initial_tv - best_final_tv) / best_initial_tv * 100):.2f}%")
-
-# Dimensioni dei cluster
-cluster_sizes = [np.sum(best_kmeans.clusters == i) for i in range(best_kmeans.k)]
+cluster_sizes = [np.sum(clusters == c) for c in range(15)]
 print(f"\nCluster più piccolo: {min(cluster_sizes)} punti")
 print(f"Cluster più grande: {max(cluster_sizes)} punti")
-print(f"\nDistribuzione dimensioni cluster:")
+print("\nDimensioni cluster:")
 for i, size in enumerate(cluster_sizes):
-    print(f"  Cluster {i+1}: {size} punti")
+    print(f"  Cluster {i+1:2d}: {size:4d} punti")
 
-# 5. VISUALIZZAZIONE FINALE
-print("\nGenerazione figura finale...")
-fig = plot_results(data, best_kmeans, best_initial_tv, best_final_tv)
-plt.savefig('final_clustering.png', dpi=300, bbox_inches='tight')
-print("Figura finale salvata come 'final_clustering.png'")
+# 5. VISUALIZZAZIONE
+print("\n🎨 Generazione figura finale...")
+plt.figure(figsize=(12, 10))
+colors = plt.cm.rainbow(np.linspace(0, 1, 15))
 
-plt.show()
+for c in range(15):
+    cluster_points = data[clusters == c]
+    plt.scatter(cluster_points[:, 0], cluster_points[:, 1], 
+               c=[colors[c]], label=f'C{c+1}', alpha=0.6, s=15)
 
-print("\n✓ Esercizio completato! File generati:")
-print("  - elbow_method.png")
-print("  - silhouette_method.png")
-print("  - final_clustering.png")
+plt.scatter(means[:, 0], means[:, 1], c='black', marker='X', 
+           s=200, edgecolors='white', linewidths=2, label='Centroids')
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title(f'K-means (k=15) - TV init: {init_tv:.0f}, TV final: {final_tv:.0f}')
+plt.legend(bbox_to_anchor=(1.05, 1), ncol=2)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('final_clustering.png', dpi=200)
+print("✓ Salvato: final_clustering.png")
+
+print("\n✅ COMPLETATO!\n")
+print("File generati:")
+print("  • elbow_method.png")
+print("  • silhouette_method.png")
+print("  • final_clustering.png")
