@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 X=np.arange(-5,100,1)
 Y=np.arange(-50,50,1)
 
-N=1000000
+N=50
 
 all_x_paths = []
 all_y_paths = []
