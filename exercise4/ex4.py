@@ -1,20 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# ===================== FUNZIONI PRINCIPALI =====================
+# ===================== Functions =====================
 
 def euclidean_distance(x, m):
-    """Distanza euclidea tra punto x e media m"""
     return np.sqrt(np.sum((x - m) ** 2))
 
 def initialize_means(data, k):
-    """Inizializza k medie random"""
     min_vals = np.min(data, axis=0)
     max_vals = np.max(data, axis=0)
     return np.random.uniform(min_vals, max_vals, (k, data.shape[1]))
 
 def assign_clusters(data, means):
-    """Assegna ogni punto al cluster più vicino"""
     clusters = np.zeros(len(data), dtype=int)
     for i, point in enumerate(data):
         distances = [euclidean_distance(point, mean) for mean in means]
@@ -22,7 +19,6 @@ def assign_clusters(data, means):
     return clusters
 
 def calculate_tv(data, means, clusters, k):
-    """Calcola Total Variation"""
     tv = 0
     for c in range(k):
         cluster_points = data[clusters == c]
@@ -31,7 +27,6 @@ def calculate_tv(data, means, clusters, k):
     return tv
 
 def update_means(data, clusters, k):
-    """Aggiorna le medie"""
     means = np.zeros((k, data.shape[1]))
     for c in range(k):
         cluster_points = data[clusters == c]
@@ -40,7 +35,7 @@ def update_means(data, clusters, k):
     return means
 
 def kmeans(data, k, max_iter=100):
-    """Algoritmo k-means completo"""
+    """Algorythm k-means"""
     means = initialize_means(data, k)
     tv_history = []
     
@@ -49,7 +44,6 @@ def kmeans(data, k, max_iter=100):
         tv = calculate_tv(data, means, clusters, k)
         tv_history.append(tv)
         
-        # Convergenza: TV cambia < 1%
         if iteration > 0:
             change = abs(tv_history[-1] - tv_history[-2]) / tv_history[-2] * 100
             if change < 1.0:
@@ -60,7 +54,6 @@ def kmeans(data, k, max_iter=100):
     return means, clusters, tv_history[0], tv_history[-1]
 
 def silhouette_score(data, clusters, k):
-    """Calcola silhouette score medio"""
     if k == 1:
         return 0
     
@@ -72,11 +65,9 @@ def silhouette_score(data, clusters, k):
         if len(same_cluster) <= 1:
             continue
         
-        # a_i: distanza media intra-cluster
         a_i = np.mean([np.linalg.norm(data[i] - p) for p in same_cluster 
                        if not np.array_equal(p, data[i])])
         
-        # b_i: distanza minima inter-cluster
         b_i = float('inf')
         for c in range(k):
             if c != cluster_i:
@@ -85,7 +76,6 @@ def silhouette_score(data, clusters, k):
                     dist = np.mean([np.linalg.norm(data[i] - p) for p in other_cluster])
                     b_i = min(b_i, dist)
         
-        # s_i
         s_i = (b_i - a_i) / max(a_i, b_i) if b_i != float('inf') else 0
         scores.append(s_i)
     
@@ -93,13 +83,13 @@ def silhouette_score(data, clusters, k):
 
 # ===================== MAIN =====================
 
-print("📂 Caricamento dati...")
+print("upload data...")
 data = np.loadtxt('s2.txt')
-print(f"✓ Caricati {len(data)} punti\n")
+print(f"{len(data)} points uploaded\n")
 
 # 1. ELBOW METHOD
-print("📊 Metodo Elbow...")
-k_range = range(2, 21)
+print("Elbow method...")
+k_range = range(5, 20)
 tv_values = []
 
 for k in k_range:
@@ -109,15 +99,16 @@ for k in k_range:
 
 plt.figure(figsize=(10, 5))
 plt.plot(k_range, tv_values, 'bo-', linewidth=2)
-plt.xlabel('Numero di cluster (k)')
-plt.ylabel('Total Variation')
-plt.title('Elbow Method')
+plt.xlabel('Number cluster (k)', fontsize=16)
+plt.ylabel('Total Variation', fontsize=16)
+plt.title('Elbow Method', fontsize=18)
 plt.grid(True, alpha=0.3)
+plt.tick_params(axis='both', which='major', labelsize=14)
 plt.savefig('elbow_method.png', dpi=200)
-print("✓ Salvato: elbow_method.png\n")
+print("saved: elbow_method.png\n")
 
 # 2. SILHOUETTE METHOD
-print("📊 Metodo Silhouette...")
+print("Silhouette method...")
 silhouette_scores = []
 
 for k in k_range:
@@ -128,40 +119,38 @@ for k in k_range:
 
 plt.figure(figsize=(10, 5))
 plt.plot(k_range, silhouette_scores, 'ro-', linewidth=2)
-plt.xlabel('Numero di cluster (k)')
-plt.ylabel('Silhouette Score')
-plt.title('Silhouette Method')
+plt.xlabel('Number of cluster (k)', fontsize=16)
+plt.ylabel('Silhouette Score', fontsize=16)
+plt.title('Silhouette Method', fontsize=18)
 plt.grid(True, alpha=0.3)
+plt.tick_params(axis='both', which='major', labelsize=14)
 plt.savefig('silhouette_method.png', dpi=200)
-print("✓ Salvato: silhouette_method.png\n")
+print("saved: silhouette_method.png\n")
 
 optimal_k = k_range[np.argmax(silhouette_scores)]
-print(f"🎯 K ottimale (Silhouette): {optimal_k}\n")
+print(f"best k (Silhouette): {optimal_k}\n")
 
-# 3. CLUSTERING FINALE con k=15
-print("🔧 Clustering finale con k=15...")
+# 3. CLUSTERING k=15
+print(" Clustering with k=15...")
 means, clusters, init_tv, final_tv = kmeans(data, 15)
-print(f"  TV iniziale: {init_tv:.0f}")
-print(f"  TV finale: {final_tv:.0f}")
+print(f"  TV initial value: {init_tv:.0f}")
+print(f"  TV final value: {final_tv:.0f}")
 
 # 4. REPORT
 print("\n" + "="*50)
-print("📋 REPORT FINALE")
+print("REPORT")
 print("="*50)
-print(f"Numero cluster: k=15")
-print(f"TV iniziale: {init_tv:.2f}")
-print(f"TV finale: {final_tv:.2f}")
-print(f"Riduzione: {(init_tv-final_tv)/init_tv*100:.1f}%")
+print(f"Number of cluster: k=15")
+print(f"TV initial value: {init_tv:.2f}")
+print(f"TV final value: {final_tv:.2f}")
+print(f"Percentual reduction in TV: {(init_tv-final_tv)/init_tv*100:.1f}%")
 
 cluster_sizes = [np.sum(clusters == c) for c in range(15)]
-print(f"\nCluster più piccolo: {min(cluster_sizes)} punti")
-print(f"Cluster più grande: {max(cluster_sizes)} punti")
-print("\nDimensioni cluster:")
-for i, size in enumerate(cluster_sizes):
-    print(f"  Cluster {i+1:2d}: {size:4d} punti")
+print(f"\nSmaller cluster: {min(cluster_sizes)} points")
+print(f"Bigger cluster: {max(cluster_sizes)} points")
 
-# 5. VISUALIZZAZIONE
-print("\n🎨 Generazione figura finale...")
+
+# 5. GRAPHIC
 plt.figure(figsize=(12, 10))
 colors = plt.cm.rainbow(np.linspace(0, 1, 15))
 
@@ -173,17 +162,13 @@ for c in range(15):
 plt.scatter(means[:, 0], means[:, 1], c='black', marker='X', 
            s=200, edgecolors='white', linewidths=2, label='Centroids')
 
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.title(f'K-means (k=15) - TV init: {init_tv:.0f}, TV final: {final_tv:.0f}')
+plt.xlabel('X', fontsize=16)
+plt.ylabel('Y', fontsize=16)
+plt.title(f'K-means (k=15)', fontsize=18)
 plt.legend(bbox_to_anchor=(1.05, 1), ncol=2)
 plt.grid(True, alpha=0.3)
+plt.tick_params(axis='both', which='major', labelsize=14)
 plt.tight_layout()
 plt.savefig('final_clustering.png', dpi=200)
-print("✓ Salvato: final_clustering.png")
+print("saved: final_clustering.png")
 
-print("\n✅ COMPLETATO!\n")
-print("File generati:")
-print("  • elbow_method.png")
-print("  • silhouette_method.png")
-print("  • final_clustering.png")
