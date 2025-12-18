@@ -35,7 +35,7 @@ def update_means(data, clusters, k):
     return means
 
 def kmeans(data, k, max_iter=100):
-    """Algorythm k-means"""
+    """Algorithm k-means"""
     means = initialize_means(data, k)
     tv_history = []
     
@@ -88,8 +88,9 @@ data = np.loadtxt('s2.txt')
 print(f"{len(data)} points uploaded\n")
 
 # 1. ELBOW METHOD
+
 print("Elbow method...")
-k_range = range(5, 20)
+k_range = range(10, 21)
 tv_values = []
 
 for k in k_range:
@@ -97,7 +98,7 @@ for k in k_range:
     tv_values.append(final_tv)
     print(f"  k={k}: TV={final_tv:.0f}")
 
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(10, 6))
 plt.plot(k_range, tv_values, 'bo-', linewidth=2)
 plt.xlabel('Number cluster (k)', fontsize=16)
 plt.ylabel('Total Variation', fontsize=16)
@@ -117,7 +118,7 @@ for k in k_range:
     silhouette_scores.append(score)
     print(f"  k={k}: Score={score:.3f}")
 
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(10, 6))
 plt.plot(k_range, silhouette_scores, 'ro-', linewidth=2)
 plt.xlabel('Number of cluster (k)', fontsize=16)
 plt.ylabel('Silhouette Score', fontsize=16)
@@ -129,6 +130,7 @@ print("saved: silhouette_method.png\n")
 
 optimal_k = k_range[np.argmax(silhouette_scores)]
 print(f"best k (Silhouette): {optimal_k}\n")
+
 
 # 3. CLUSTERING k=15
 print(" Clustering with k=15...")
@@ -151,7 +153,7 @@ print(f"Bigger cluster: {max(cluster_sizes)} points")
 
 
 # 5. GRAPHIC
-plt.figure(figsize=(12, 10))
+plt.figure(figsize=(10, 6))
 colors = plt.cm.rainbow(np.linspace(0, 1, 15))
 
 for c in range(15):
