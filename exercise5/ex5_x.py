@@ -80,7 +80,7 @@ validation = np.sum(CT, axis=1) * dx
 # Plot result
 plt.figure(figsize=(10,6))
 plt.plot(radiological_path, label="Ray tracing")
-plt.plot(validation, "--", label="Column sum (validation)")
+plt.plot(validation, "--", label="Row sum (validation)")
 plt.xlabel("Ray ID", fontsize=16)
 plt.ylabel("Radiological path", fontsize=16)
 plt.title("Ray tracing (parallel to x-axis)", fontsize=18, weight='bold')

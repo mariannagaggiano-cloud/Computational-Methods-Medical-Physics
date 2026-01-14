@@ -51,7 +51,7 @@ for ray_idx, y0 in enumerate(y_starts):
     a_min = max(0.0, min(ax_first, ax_last), min(ay_first, ay_last))
     a_max = min(1.0, max(ax_first, ax_last), max(ay_first, ay_last))
 
-    if a_min >= a_max: #do not eliminate rays outside the figure
+    if a_min >= a_max: #skip rays outside the figure
         continue
 
     ################################################################

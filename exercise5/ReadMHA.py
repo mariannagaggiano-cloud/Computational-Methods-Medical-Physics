@@ -59,11 +59,11 @@ def main():
 
     # ---- SAVE FULL IMAGE ----
     plt.figure()
-    plt.title("Counts map")
+    plt.title("Shepp-Logan phantom")
     plt.imshow(volume, cmap="gray", vmin=volume.min(), vmax=volume.max())
     plt.xlabel("x in pixels")
     plt.ylabel("y in pixels")
-    plt.colorbar(label="Counts")
+    plt.colorbar(label="Radiological property")
     plt.savefig("counts_map.png", dpi=300, bbox_inches="tight")
     plt.close()
     print("Saved image: counts_map.png")
