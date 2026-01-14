@@ -105,9 +105,10 @@ for ray_idx, y0 in enumerate(y_starts):
 # Plot
 plt.figure(figsize=(10,6))
 plt.plot(radiological_path, lw=2)
-plt.xlabel("Ray ID", fontsize=14)
-plt.ylabel("Radiological path", fontsize=14)
-plt.title("Ray tracing at 30° (Siddon)", fontsize=16)
+plt.xlabel("Ray ID", fontsize=16)
+plt.ylabel("Radiological path", fontsize=16)
+plt.title("Ray tracing at 30°", fontsize=18, weight='bold')
 plt.grid()
+plt.tick_params(axis='both', which='major', labelsize=14)
 plt.tight_layout()
 plt.savefig("ray_tracing_30.png", dpi=300, bbox_inches="tight")
